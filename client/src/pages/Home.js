@@ -22,13 +22,17 @@ const Home = () => {
   };
 
   const handleAdd = async () => {
+    const foodObj = {
+      name,
+      food,
+      tableNo,
+    };
     try {
-      await axios.post("http://localhost:3006/api/add", {
-        name,
-        food,
-        tableNo,
-      });
-      fetchData(); // Fetch data again after adding
+      const data = await axios.post("http://localhost:3006/api/add", foodObj);
+      setData((prev) => [data.data.result, ...prev]);
+      setName("");
+      setFood("");
+      setTableNo("");
     } catch (error) {
       console.log(error);
     }
@@ -37,24 +41,18 @@ const Home = () => {
   const handleDelete = async (id) => {
     try {
       await axios.delete(`http://localhost:3006/api/delete/${id}`);
-      fetchData(); // Fetch data again after deleting
+      setData((prev) => prev.filter((data) => data.id !== id));
     } catch (error) {
       console.log(error);
     }
   };
 
-  const handleEdit = async (id, newName, newFood, newTableNo) => {
-    try {
-      await axios.put(`http://localhost:3006/api/update/${id}`, {
-        name,
-        food,
-        tableNo,
-      });
-      console.log("Data edited:", { id, name, food, tableNo });
-      fetchData(); // Fetch data again after editing
-    } catch (error) {
-      console.log("Edit error:", error);
-    }
+  const handleEdit = async (id, name, food, tableNo) => {
+    setName(name);
+    setFood(food);
+    setTableNo(tableNo);
+    handleDelete(id);
+    handleAdd();
   };
 
   return (
@@ -91,16 +89,16 @@ const Home = () => {
           </tr>
         </thead>
         <tbody>
-          {data.map((item) => (
-            <tr key={item.id}>
-              <td>{item.name}</td>
-              <td>{item.food}</td>
-              <td>{item.tableNo}</td>
+          {data?.map((item) => (
+            <tr key={item?.id}>
+              <td>{item?.name}</td>
+              <td>{item?.food}</td>
+              <td>{item?.tableNo}</td>
               <td>
                 <button onClick={() => handleDelete(item.id)}>Delete</button>
                 <button
                   onClick={() =>
-                    handleEdit(item.id, "newName", "newFood", "newTableNo")
+                    handleEdit(item.id, item.name, item.food, item.tableNo)
                   }
                 >
                   Edit
